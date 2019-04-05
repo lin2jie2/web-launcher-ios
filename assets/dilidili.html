@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+	<meta name="referrer" content="no-referrer" />
+	<title>嘀哩嘀哩-动画-最新更新</title>
+	<style>
+		* { box-sizing: border-box; }
+		body { margin: 0; }
+		section.list {
+			margin: 16px auto;
+			width: calc((240px + 8px * 2) * 4);
+		}
+		section.list ul {
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
+		section.list ul li {
+			margin: 0;
+			padding: 7px;
+			list-style: none;
+			width: calc(240px + 8px * 2);
+			border: 1px solid white;
+			display: flex;
+			flex-direction: column;
+		}
+		section.list ul li:hover {
+			border-color: #eaeaea;
+			box-shadow: 0 0 16px #dcdcdc;
+		}
+		section.list ul li a {
+			text-decoration: none;
+			color: #333;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+		}
+		section.list ul li a img {
+			width: 240px;
+			height: auto;
+		}
+		section.list ul li a p {
+			margin: 0;
+			padding: 0;
+			text-indent: 0;
+			line-height: 1.5em;
+		}
+		section.video {
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+			align-items: center;
+		}
+		section.video video {
+			background-color: black;
+		}
+		.mask {
+			position: fixed;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			background-color: rgba(0, 0, 0, 0.18);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		.mask .loading {
+			width: 80px;
+			height: 80px;
+			background-color: rgba(255, 255, 255, 0.97);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #333;
+			border-radius: 8px;
+		}
+
+		@media screen and (max-width: 768px) {
+			section.list {
+				width: inherit;
+				padding: 0 8px;
+			}
+			section.list ul li {
+				width: calc((100vw - 16px) / 3);
+			}
+			section.list ul li a img {
+				width: calc((100vw - 16px) / 3 - 8px * 2);
+			}
+		}
+
+		@media screen and (max-width: 414px) {
+			section.list {
+				width: inherit;
+				padding: 0 8px;
+			}
+			section.list ul li {
+				width: calc((100vw - 16px) / 2);
+			}
+			section.list ul li a img {
+				width: calc((100vw - 16px) / 2 - 8px * 2);
+			}
+		}
+	</style>
+</head>
+<body>
+	<section class="video"></section>
+	<section class="mask" style="display:none"><div class="loading">加载中</div></section>
+	<section class="list">
+		<p>loading...</p>
+	</section>
+	<script>
+		function get_list() {
+			fetch("https://dv321.xyz/dilidili/zxgz/")
+			.then(response => response.json())
+			.then(result => {
+				if (result.status == "OK") {
+					show_list(result.data)
+				}
+				else {
+					alert(result.status)
+				}
+			})
+			.catch(e => console.error(e))
+		}
+
+		function show_list(data) {
+			let list = data.map(item => `<li><a data-uri="${item.link}" href="javascript:void(0)" onclick="get_watch('${item.link}')"><img src="${item.thumb}" /><div><p>${item.anime}</p><p>${item.episode}</p></div></a></li>`)
+			document.querySelector("section.list").innerHTML = `<ul>${list.join('')}</ul>`
+		}
+
+		function get_watch(link) {
+			let mask = document.querySelector("section.mask")
+			mask.style.display = 'flex'
+			fetch(`https://dv321.xyz/dilidili/${link}`)
+			.then(response => response.json())
+			.then(result => {
+				mask.style.display = 'none'
+				if (result.status == "OK") {
+					if ('Linking' in window) {
+						Linking.instantView(result.data).then(() => {}).catch(e => {
+							alert(e)
+						})
+					}
+					else {
+						let opener = window.open(result.data, '_blank')
+						if (opener == null) {
+							let a = document.querySelector(`section.list ul li a[data-uri="${link}"]`)
+							a.href = result.data
+							a.target = '_blank'
+							a.onclick = function() {}
+							alert('点击播放')
+						}
+					}
+				}
+				else {
+					alert(result.status)
+				}
+			})
+			.catch(e => {
+				mask.style.display = 'none'
+				console.error(e)
+			})
+		}
+
+		function show_watch(video) {
+			if (navigator.userAgent.indexOf('Safari') != -1) {
+				window.open(video, '_blank')
+			}
+			else {
+				let html = `<video controller autoplay><source src="${video}" /></video>`
+				let opener = window.open('about:blank', '_blank')
+				opener.document.write(html)
+			}
+		}
+
+		get_list()
+	</script>
+</body>
+</html>
